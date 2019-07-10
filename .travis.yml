@@ -1,0 +1,10 @@
+sudo: required
+services:
+  -docker
+script:
+  - sudo service mysql stop
+  - sudo docker build -t amirrezasalamat/social_interactions_python .
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-std$
+  - docker push amirrezasalamat/social_interaction_python
+
