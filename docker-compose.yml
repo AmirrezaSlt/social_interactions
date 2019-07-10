@@ -4,10 +4,10 @@ services:
     image: mongo:4.1
     restart: always
   python:
-    image: amirrezasalamat/social_interaction_python
+    image: amirrezasalamat/social_interactions_python
     depends_on: db
   go:
-    image: amirrezasalamat/social_interaction_go
+    image: amirrezasalamat/social_interactions_go
     depends_on: db
 
 

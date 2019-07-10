@@ -4,3 +4,4 @@
 venv
 /python/
 /go/
+*.vscode
