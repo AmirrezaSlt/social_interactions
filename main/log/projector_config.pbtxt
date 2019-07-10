@@ -1,0 +1,4 @@
+embeddings {
+  tensor_name: "embeddings/Variable:0"
+  metadata_path: "/home/amirreza/Codes/social_interactions/Project/main/log/metadata.tsv"
+}
