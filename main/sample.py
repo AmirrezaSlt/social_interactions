@@ -9,6 +9,7 @@ import os
 import random
 import sys
 from tempfile import gettempdir
+import time
 import zipfile
 
 import numpy as np
@@ -16,8 +17,8 @@ from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.contrib.tensorboard.plugins import projector
-
+# from tensorflow.contrib.tensorboard.plugins import projector
+t0 = time.time()
 data_index = 0
 
 
@@ -118,6 +119,9 @@ def word2vec_basic(log_dir):
         data_index += 1
     # Backtrack a little bit to avoid skipping words in the end of a batch
     data_index = (data_index + len(data) - span) % len(data)
+    print('batch: ', batch)
+    print('labels: ', labels)
+
     return batch, labels
 
   batch, labels = generate_batch(batch_size=8, num_skips=2, skip_window=1)
@@ -146,7 +150,6 @@ def word2vec_basic(log_dir):
   graph = tf.Graph()
 
   with graph.as_default():
-
     # Input data.
     with tf.name_scope('inputs'):
       train_inputs = tf.placeholder(tf.int32, shape=[batch_size])
@@ -154,7 +157,7 @@ def word2vec_basic(log_dir):
       valid_dataset = tf.constant(valid_examples, dtype=tf.int32)
 
     # Ops and variables pinned to the CPU because of missing GPU implementation
-    with tf.device('/cpu:0'):
+    with tf.device('/device:CPU:0'):
       # Look up embeddings for inputs.
       with tf.name_scope('embeddings'):
         embeddings = tf.Variable(
@@ -225,7 +228,8 @@ def word2vec_basic(log_dir):
       batch_inputs, batch_labels = generate_batch(batch_size, num_skips,
                                                   skip_window)
       feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
-
+      print('bin :', train_inputs)
+      print('lin :', train_labels)
       # Define metadata variable.
       run_metadata = tf.RunMetadata()
 
@@ -266,7 +270,8 @@ def word2vec_basic(log_dir):
             log_str = '%s %s,' % (log_str, close_word)
           print(log_str)
     final_embeddings = normalized_embeddings.eval()
-
+    t = time.time()
+    print('time: ',t-t0)
     # Write corresponding labels for the embeddings.
     with open(log_dir + '/metadata.tsv', 'w') as f:
       for i in xrange(vocabulary_size):

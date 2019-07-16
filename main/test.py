@@ -13,33 +13,30 @@ num_sampled = 2
 
 def generate_batch():
     global data_index
-    if data_index % 2 == 0:
-        batch, labels = np.random.random_integers(low=0, high=3, size=2)
-        while batch == labels:
+    final_batch = np.array([])
+    final_labels = np.array([])
+    for _ in range(batch_size):
+        if data_index % 2 == 0:
             batch, labels = np.random.random_integers(low=0, high=3, size=2)
-    if data_index % 2 == 1:
-        batch, labels = np.random.random_integers(low=4, high=7, size=2)
-        while batch == labels:
+            while batch == labels:
+                batch, labels = np.random.random_integers(low=0, high=3, size=2)
+        if data_index % 2 == 1:
             batch, labels = np.random.random_integers(low=4, high=7, size=2)
-    # batch_vec = np.zeros([dictionary_size])
-    # batch_vec[batch] = 1
-    # labels_vec = np.zeros([dictionary_size])
-    # labels_vec[labels] = 1
+            while batch == labels:
+                batch, labels = np.random.random_integers(low=4, high=7, size=2)
+        final_batch = np.append(final_batch, batch)
+        final_labels = np.append(final_labels, labels)
+    final_batch = final_batch.astype(int)
+    final_labels = final_labels.astype(int)
+    final_labels = np.reshape(final_labels,[batch_size, 1])
     data_index += 1
-    batch = [batch]
-    labels = np.reshape(labels, [1, 1])
-    labels = np.transpose(labels)
-    print('batch: ', batch)
-    print('labels: ', labels.shape)
-    return batch, labels
-
-
+    return final_batch, final_labels
 data_index = 0
 graph = tf.Graph()
 with graph.as_default():
     with tf.name_scope('inputs'):
-        train_inputs = tf.placeholder(tf.int32, shape=[None])
-        train_labels = tf.placeholder(tf.int32, shape=[None, None])
+        train_inputs = tf.placeholder(tf.int32, shape=[batch_size])
+        train_labels = tf.placeholder(tf.int32, shape=[batch_size, 1])
     with tf.device('/cpu:0'):
         with tf.name_scope('embeddings'):
             embeddings = tf.Variable(

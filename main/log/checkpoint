@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/amirreza/Codes/social_interactions/Project/main/log/model.ckpt"
-all_model_checkpoint_paths: "/home/amirreza/Codes/social_interactions/Project/main/log/model.ckpt"
+model_checkpoint_path: "/home/amirreza/Codes/social_interactions/python/main/log/model.ckpt"
+all_model_checkpoint_paths: "/home/amirreza/Codes/social_interactions/python/main/log/model.ckpt"
