@@ -5,10 +5,10 @@ import numpy as np
 import tensorflow as tf
 
 
-dictionary_size = 8
+vocabulary_size = 8
 batch_size = 4
-embedding_size = 2
-num_sampled = 2
+embedding_size = 4
+num_sampled = 3
 
 
 def generate_batch():
@@ -40,14 +40,16 @@ with graph.as_default():
     with tf.device('/cpu:0'):
         with tf.name_scope('embeddings'):
             embeddings = tf.Variable(
-                tf.random_uniform([dictionary_size, embedding_size], -1.0, 1.0))
+                tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
             embed = tf.nn.embedding_lookup(embeddings, train_inputs)
+            sample1 = tf.nn.embedding_lookup(embeddings, 1)
+            sample2 = tf.nn.embedding_lookup(embeddings, 2)
         with tf.name_scope('weights'):
             nce_weights = tf.Variable(
-                tf.truncated_normal([dictionary_size, embedding_size],
+                tf.truncated_normal([vocabulary_size, embedding_size],
                                     stddev=1.0 / math.sqrt(embedding_size)))
         with tf.name_scope('biases'):
-            nce_biases = tf.Variable(tf.zeros([embedding_size]))
+            nce_biases = tf.Variable(tf.zeros([vocabulary_size]))
     with tf.name_scope('loss'):
         loss = tf.reduce_mean(
             tf.nn.nce_loss(
@@ -56,14 +58,14 @@ with graph.as_default():
                 labels=train_labels,
                 inputs=embed,
                 num_sampled=num_sampled,
-                num_classes=dictionary_size))
+                num_classes=vocabulary_size))
     with tf.name_scope('optimizer'):
-        optimizer = tf.train.GradientDescentOptimizer(1.0).minimize(loss)
+        optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 
     norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keepdims=True))
     normalized_embeddings = embeddings / norm
     init = tf.global_variables_initializer()
-num_steps = 1001
+num_steps = 100001
 with tf.Session(graph=graph) as session:
     init.run()
     print('Initialized')
@@ -71,11 +73,13 @@ with tf.Session(graph=graph) as session:
     for step in range(num_steps):
         batch_inputs, batch_labels = generate_batch()
         feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
+        print('1: ', sample1.eval())
+        print('2: ', sample2.eval())
         _, loss_val = session.run([optimizer, loss], feed_dict=feed_dict)
         if step % 10 == 0:
             if step > 0:
-                average_loss /= 2000
-            print('Average loss at step ', step, ': ', average_loss)
+                average_loss /= 10
+            print('Average loss at step ', step, ': ', loss_val)
             # test_in = tf.constant([1., 0., 0., 0., 0., 0., 0., 0.], shape=[1, 8])
             # # print(nce_weights.eval())
             # embed = tf.add(tf.matmul(test_in, nce_weights), nce_biases)
