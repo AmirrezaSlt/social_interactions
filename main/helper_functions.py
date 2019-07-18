@@ -2,8 +2,6 @@ import time
 import math
 import logging
 from functools import wraps
-from env import logger
-
 
 def timer(orig_func):
     """Measure runtime of functions"""

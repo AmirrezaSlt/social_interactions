@@ -1,6 +1,6 @@
 import collections
 from env import logger, mongo_client, db
-from helper_functions import timer, debug, exception
+from helper_functions import timer, debug
 import numpy as np
 import pandas as pd
 import pickle
