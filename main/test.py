@@ -1,15 +1,10 @@
-from __future__ import absolute_import, division, print_function
-
 import math
 import numpy as np
 import tensorflow as tf
-
-
 vocabulary_size = 8
 batch_size = 4
-embedding_size = 4
-num_sampled = 3
-
+embedding_size = 1
+num_sampled = 2
 
 def generate_batch():
     global data_index
@@ -42,8 +37,6 @@ with graph.as_default():
             embeddings = tf.Variable(
                 tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
             embed = tf.nn.embedding_lookup(embeddings, train_inputs)
-            sample1 = tf.nn.embedding_lookup(embeddings, 1)
-            sample2 = tf.nn.embedding_lookup(embeddings, 2)
         with tf.name_scope('weights'):
             nce_weights = tf.Variable(
                 tf.truncated_normal([vocabulary_size, embedding_size],
@@ -73,8 +66,7 @@ with tf.Session(graph=graph) as session:
     for step in range(num_steps):
         batch_inputs, batch_labels = generate_batch()
         feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
-        print('1: ', sample1.eval())
-        print('2: ', sample2.eval())
+        print('embeddings: ', normalized_embeddings.eval())
         _, loss_val = session.run([optimizer, loss], feed_dict=feed_dict)
         if step % 10 == 0:
             if step > 0:
@@ -96,4 +88,3 @@ with tf.Session(graph=graph) as session:
             # print('5, ', embed.eval())
             # average_loss = 0
     final_embeddings = normalized_embeddings.eval()
-
