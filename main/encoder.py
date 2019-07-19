@@ -15,14 +15,8 @@ def counter(mongo_client, db):
         return reset_counter(mongo_client, db)
     docs = db.user_follower.find({'read': '0'}, {'user_id': 1, 'follower_user_id': 1})
     for doc in docs: 
-        if doc['user_id'] in counts:
-            counts[doc['user_id']] += 1
-        else:
-            counts[doc['user_id']] = 1
-        if doc['follower_user_id'] in counts:
-            counts[doc['follower_user_id']] += 1
-        else:
-            counts[doc['follower_user_id']] = 1
+        counts[doc['user_id']] += 1
+        counts[doc['follower_user_id']] += 1
         db.user_follower.update_one({'_id': doc['_id']}, {'$set': {'read': '1', 'expired': '0'}})
     with open('./main/counts', 'wb') as file:
         pickle.dump(counts, file)
