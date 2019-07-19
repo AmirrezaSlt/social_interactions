@@ -1,3 +1,4 @@
+import collections as cnt
 from env import mongo_client, db
 from helper_functions import timer, debug
 import pandas 
@@ -5,14 +6,14 @@ import pickle
 
 @debug
 @timer
-def encode(mongo_client, db):
+def counter(mongo_client, db):
     db.user_follower.update_many({'expired': {'$exists': False}}, {'$set': {'expired': '0'}})
     try: 
         with open('./main/counts', 'rb') as f:
             counts = pickle.load(f)
     except FileNotFoundError:
-        counts = {}
-    docs = db.user_follower.find({'expired': '0'}, {'user_id': 1, 'follower_user_id': '1'})
+        return reset_counter(mongo_client, db)
+    docs = db.user_follower.find({'expired': '0'}, {'user_id': 1, 'follower_user_id': 1})
     for doc in docs: 
         if doc['user_id'] in counts:
             counts[doc['user_id']] += 1
@@ -25,5 +26,30 @@ def encode(mongo_client, db):
         db.user_follower.update_one({'_id': doc['_id']}, {'$set': {'expired': '1'}})
     with open('./main/counts', 'wb') as file:
         pickle.dump(counts, file)
+    return integer_encoding(mongo_client, db, counts)
+def reset_counter(mongo_client, db): 
+    db.user_follower.update_many({}, {'$set': {'expired': '0'}})
+    docs = db.user_follower.find({'expired': '0'}, {'user_id': 1, 'follower_user_id': 1})
+    counts = cnt.Counter()
+    for doc in docs: 
+        counts[doc['user_id']] += 1
+        counts[doc['follower_user_id']] += 1
+        db.user_follower.update_one({'_id': doc['_id']}, {'$set': {'expired': '1'}})
+    with open('./main/counts', 'wb') as file:
+        pickle.dump(counts, file)
+    return integer_encoding(mongo_client, db, counts)
+
+def integer_encoding(mongo_client, db, counts):
+    dictionary = {}
+    for code, count in enumerate(counts.most_common()):
+        dictionary[count[0]] = code
+    with open('./main/dictionary', 'wb') as file:
+        pickle.dump(dictionary, file)
+    reversed_dictionary = {v: k for k, v in dictionary.items()}
+    with open('./main/reversed_dictionary', 'wb') as file:
+        pickle.dump(reversed_dictionary, file)
 if __name__ == "__main__":
-    encode(mongo_client, db)
+    # reset_counter(mongo_client, db)
+    with open('./main/counts', 'rb') as f:
+        counts = pickle.load(f)
+    integer_encoding(mongo_client, db, counts)
