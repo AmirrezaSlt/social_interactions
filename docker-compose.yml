@@ -1,13 +1,13 @@
 version: '3.7'
 services:
   db:
-    image: mongo:4.1
+    image: amirrezasalamat/rumi_mongo
     restart: always
   python:
     image: amirrezasalamat/social_interactions_python
     depends_on: db
-  go:
-    image: amirrezasalamat/social_interactions_go
-    depends_on: db
+  # go:
+  #   image: amirrezasalamat/social_interactions_go
+  #   depends_on: db
 
 
