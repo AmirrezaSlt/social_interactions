@@ -21,6 +21,8 @@ def walk_path(db, doc, path_length):
     for i in range(2, path_length): 
         options = db.follower_graph.find_one({'user_id': path[i-1].item()}, {'_id': 0, 'followers': 1})
         if options is None:
+            while path[-1] == -1:
+                path = np.delete(path, -1)
             return path
         else:
             options = options['followers']
