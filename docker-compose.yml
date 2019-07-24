@@ -5,7 +5,10 @@ services:
     restart: always
   python:
     image: amirrezasalamat/social_interactions_python
-    depends_on: db
+    depends_on: 
+    - db
+    stdin_open: true
+    tty: true
   # go:
   #   image: amirrezasalamat/social_interactions_go
   #   depends_on: db
