@@ -1,16 +1,23 @@
 version: '3.7'
 services:
   db:
-    image: amirrezasalamat/rumi_mongo
+    image: mongo:4.1
+    volumes: 
+      - ./data/mongodb/db:/data/db
+      - ./data/mongodb/configdb:/data/configdb
+    ports: 
+      - "27017:27017"
+    command: mongod --storageEngine=wiredTiger
     restart: always
   python:
-    image: amirrezasalamat/social_interactions_python
+    build: 
+      context: ./notebook
+    volumes: 
+      - ./notebook/main:/tf
+    environment: 
+      - PASSWORD=password
+    ports:
+      - 8888:8888
     depends_on: 
     - db
-    stdin_open: true
-    tty: true
-  # go:
-  #   image: amirrezasalamat/social_interactions_go
-  #   depends_on: db
-
 
